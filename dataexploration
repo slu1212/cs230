@@ -1,0 +1,6 @@
+import preprocess
+
+#Visualize the preprocessed data
+data = preprocess.data()
+
+data.preview_data(['apple_pie', 'pizza'], n = 2)
