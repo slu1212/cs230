@@ -5,3 +5,11 @@
 #screenshots of how a working user interaction with the User file looks like:
 
 ![alt text](https://raw.githubusercontent.com/slu1212/cs230/master/user1.png)
+
+![alt text](https://raw.githubusercontent.com/slu1212/cs230/master/user2.png)
+
+![alt text](https://raw.githubusercontent.com/slu1212/cs230/master/user3.png)
+
+![alt text](https://raw.githubusercontent.com/slu1212/cs230/master/user4.png)
+
+![alt text](https://raw.githubusercontent.com/slu1212/cs230/master/user5.png)
