@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+import keras
+import glob
+import matplotlib.pyplot as plt
+import scipy
+import seaborn as sns
+from mlxtend.preprocessing import minmax_scaling
+from sklearn.metrics import roc_curve, auc
+from keras.utils.np_utils import to_categorical
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPool2D, GlobalAveragePooling2D, Input, BatchNormalization, Multiply, Activation
+from keras.optimizers import RMSprop, SGD
+from keras.regularizers import l2
+from keras.preprocessing.image import ImageDataGenerator
+from keras.utils import plot_model
+from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, EarlyStopping
+from keras.callbacks.callbacks import ProgbarLogger
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from keras import backend as K
+from preprocess import DataCollector
+import os
+
+dc = DataCollector()
+train_data = dc.load_and_augment_data('../data/train/')
+print("Number of batches: " + str(len(train_data)))
+print("Batch Shape: " + str(train_data.__getitem__(0).shape))
+
+print('Start')
+encoder_model = keras.applications.resnet.ResNet152(include_top=False, weights='imagenet', input_shape=(256, 256, 3), 
+                                                    pooling='avg', classes=1000)
+
+num_batches = len(train_data)
+file_batch_count = 100
+file_num = 0
+f_indx = 0
+encoding_dict = dict()
+
+for i in train_data:
+    filename_idx = f_indx * train_data.batch_size
+    batch_filenames = train_data.filenames[filename_idx : min(filename_idx + train_data.batch_size, len(train_data.filenames))]
+    encodings = encoder_model.predict(i)
+    
+    for j in range(encodings.shape[0]):
+        filename = batch_filenames[j]
+        encoding = encodings[j]
+        encoding_dict[filename] = encoding
+    print(str(f_indx + 1) + "/" + str(len(train_data)))
+    
+    if (f_indx + 1) % file_batch_count == 0:
+        print('Saving encodings to: ./encodings152/enc_' + str(file_num))
+        np.save('./encodings152/enc_' + str(file_num), encoding_dict)
+        file_num += 1
+        encoding_dict = dict()
+    f_indx += 1
+    if f_indx >= num_batches:
+        break
+        
+if len(encoding_dict) > 0:
+    print('Saving encodings to ' './encodings152/enc_' + str(file_num))
+    np.save('./encodings152/enc_' + str(file_num), encoding_dict)
+    
+print('Done')
