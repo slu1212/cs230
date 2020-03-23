@@ -1,0 +1,66 @@
+import pandas as pd
+import numpy as np
+import ast
+from encoding_loader import EncodingLoader 
+from img_encoder import ModelType, ImageEncoder 
+from nearest_neighbors import cos_sim_vec
+import time
+import os
+import sys
+#from nutritional_info import NutritionalInformation
+
+layer2 = pd.read_json('../data/layer2.json')
+layer1 = pd.read_json('../data/layer1.json')
+
+model_types = [ModelType.ResNet50, ModelType.ResNet101, ModelType.DenseNet121]
+model_type = model_types[2]
+
+img_enc = ImageEncoder(model_type)
+
+num_recipes_considered = 0
+progress = 0
+next_prog = .01
+
+num_sims = 0
+similarity_sum = 0
+print('start')
+for recipe_i in range(10000):
+    if recipe_i / float(10000) >= next_prog:
+        print(str(next_prog * 100) + '%')
+        next_prog += 0.01
+    num_imgs = min(len(layer2['images'][recipe_i]), 5)
+    recipe_id = layer2['id'][recipe_i]
+    layer1_idx = layer1['id'][layer1['id'] == recipe_id].index[0]
+    directory = layer1['partition'][layer1_idx]
+    if (num_imgs == 1): continue
+    num_recipes_considered += 1
+    
+    encodings = {}
+    for i in range(num_imgs):
+        file1 = layer2['images'][recipe_i][i]['id']
+        file1 = '../data/'+ directory + '/' + file1[0] + '/' + file1[1] + '/' + file1[2] + '/' + file1[3] + '/' + file1    
+        
+        enc1 = None
+        if file1 in encodings:
+            enc1 = encodings[file1]
+        else:
+            enc1 = img_enc.encode_img(file1)[0]
+            encodings[file1] = enc1
+            
+        for j in range(i + 1, num_imgs):
+            file2 = layer2['images'][recipe_i][j]['id']
+            file2 = '../data/' + directory + '/' + file2[0] + '/' + file2[1] + '/' + file2[2] + '/' + file2[3] + '/' + file2
+            enc2 = None
+            if file2 in encodings:
+                enc2 = encodings[file2]
+            else:
+                enc2 = img_enc.encode_img(file2)[0]
+                encodings[file2] = enc2
+            num_sims += 1
+            similarity_sum += np.linalg.norm(enc1 - enc2)
+
+print('Average similarity: ' + str(similarity_sum / num_sims))
+            
+            
+        
+  
