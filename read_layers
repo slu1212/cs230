@@ -1,0 +1,40 @@
+import pandas as pd
+import numpy as np
+
+layer1 = pd.read_json("layer1.json")
+layer2 = pd.read_json("layer2.json")
+
+#Shows the breakdown of recipes in layer1
+layer1.groupby(['partition']).count()
+
+#Filter layer 1 for only the recipes in Recipe 1M (Currently showing all the recipes in Recipe 1M+)
+layer2ids = layer2['id']
+layer1m = layer1.loc[layer1['id'].isin(layer2ids)]
+
+layer1m.to_csv('layer1m.csv')
+
+def img_to_recipe(convert, x, y):
+    df = pd.DataFrame(columns = ['image_id', 'image_url', 'recipe_id'])
+    for k in range(x, y):
+        images = convert.loc[k]['images']
+        rec_id = convert.loc[k]['id']
+        for i in range(len(images)):
+            im_id = images[i]['id']
+            im_url = images[i]['url']
+            df = df.append({'image_id': im_id, 'image_url': im_url, 'recipe_id': rec_id}, ignore_index = True)
+        if k%1000 == 0:
+            print(k)
+    return df        
+    
+   df_1 = img_to_recipe(layer2.loc[0:50000])
+   df_2 = img_to_recipe(layer2.loc[50001:100000], 50001, 100000)
+   df_3 = img_to_recipe(layer2.loc[100000:150000], 100000, 150000)
+   df_4 = img_to_recipe(layer2.loc[150000:200000], 150000, 200000)
+   df_5 = img_to_recipe(layer2.loc[200000:250000], 200000, 250000)
+   df_6 = img_to_recipe(layer2.loc[250000:300000], 250000, 300000)
+   df_7 = img_to_recipe(layer2.loc[300000:350000], 300000, 350000)
+   df_8 = img_to_recipe(layer2.loc[350000:400000], 350000, 400000)
+   df_9 = img_to_recipe(layer2.loc[400000:402760], 400000, 402760)
+   df = pd.concat([df_1, df_2, df_3, df_4, df_5, df_6, df_7, df_8, df_9], axis = 0)
+   df['row'] = np.arange(len(df))
+   df.to_csv('img_to_recipe.csv')
