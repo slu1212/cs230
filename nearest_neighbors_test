@@ -1,0 +1,31 @@
+import numpy as np
+import encoding_loader
+from img_encoder import ModelType, ImageEncoder 
+import time
+
+enc = img_enc.encode_img('./test_img/gnocci.jpg')[0]
+print(enc.shape)
+
+enc_loader.reset_iter()
+enc_matrix, index_to_filename = enc_loader.load_next_encoding()
+best_file = None
+best_sim = None
+t = time.time()
+i = 0
+metrics = ['cos', 'euclidean']
+metric = metrics[1]
+while True:
+    print(i)
+    i += 1
+    idx, similarity = nearest_neighbors(enc_matrix, enc, metric)
+    if best_sim == None or (metric == 'cos' and similarity > best_sim) or (metric=='euclidean' and similarity < best_sim):
+        best_sim = similarity
+        best_file = index_to_filename[idx]
+    encoding = enc_loader.load_next_encoding()
+    if encoding == None:
+        break
+    enc_matrix, index_to_filename = encoding
+t = time.time() - t
+print(best_file)
+print(best_sim)
+print("Completed in " + str(t) + "s." )
