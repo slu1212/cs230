@@ -1,0 +1,21 @@
+import pandas as pd
+import numpy as np
+import os
+from os import listdir
+from os.path import isfile, join
+from os import walk
+
+def get_images(path):
+    images = []
+    for i in listdir(path):
+        append = path + '/' + i + '/'
+        for j in listdir(append):
+            append2 = path + '/' + i + '/' + j + '/'
+            for k in listdir(append2):
+                append3 = path + '/' + i + '/' + j + '/' + k
+                for m in listdir(append3):
+                    append4 = path + '/' + i + '/' + j + '/' + k + '/' + m
+                    im = listdir(append4)
+                    images += list(im)
+    return images
+   
